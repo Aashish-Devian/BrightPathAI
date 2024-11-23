@@ -5,3 +5,4 @@ command to run this code
 -- django-admin startproject backend
 -- cd backend
 -- python manage.py startapp api
+pip install djongo==1.3.6
