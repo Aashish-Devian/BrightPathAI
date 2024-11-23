@@ -1,8 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { FaGoogle, FaFacebookF, FaGithub } from "react-icons/fa";
+import { login } from "../services/authService"; // Import login API call
+
 function LoginPage() {
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await login(formData); // Send login request
+      setMessage("Login successful! Redirecting...");
+      setError(""); // Clear any previous errors
+      // TODO: Redirect user to the dashboard or home page
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Invalid username or password. Please try again."
+      );
+      setMessage(""); // Clear success message
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       {/* Header */}
@@ -13,7 +38,7 @@ function LoginPage() {
         <div className="flex flex-col md:flex-row gap-10 p-10 bg-gray-800 rounded-lg shadow-lg w-full md:w-[900px]">
           {/* Welcome Section */}
           <div className="text-center md:text-left md:flex-1">
-          <h1 className="text-5xl font-bold">
+            <h1 className="text-5xl font-bold">
               BrightPath <span className="text-purple-500">AI</span>
             </h1>
             <h2 className="mt-4 text-2xl font-semibold">Welcome Back!</h2>
@@ -26,16 +51,24 @@ function LoginPage() {
             <h3 className="text-2xl font-semibold">Login</h3>
             <p className="text-gray-400 mt-2 mb-6">Glad you're back!</p>
 
-            <form className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
+                name="username"
                 type="text"
                 placeholder="Username"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.username}
+                onChange={handleChange}
+                required
               />
               <input
+                name="password"
                 type="password"
                 placeholder="Password"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.password}
+                onChange={handleChange}
+                required
               />
               <label className="flex items-center text-gray-400">
                 <input type="checkbox" className="mr-2" />
@@ -48,6 +81,10 @@ function LoginPage() {
                 Login
               </button>
             </form>
+
+            {/* Display Success or Error Message */}
+            {message && <p className="mt-4 text-center text-green-400">{message}</p>}
+            {error && <p className="mt-4 text-center text-red-400">{error}</p>}
 
             <a
               href="#"
@@ -72,7 +109,7 @@ function LoginPage() {
               </button>
             </div>
 
-            <div className="mt-6 text-center text-black-950">
+            <div className="mt-6 text-center text-gray-400">
               Don’t have an account?{" "}
               <a href="/signup" className="text-purple-400 hover:underline">
                 Sign up

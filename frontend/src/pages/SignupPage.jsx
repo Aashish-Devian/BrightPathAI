@@ -1,9 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { signup } from "../services/authService"; // Import signup API call
 
 function SignupPage() {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [message, setMessage] = useState(""); // For displaying messages
+  const [error, setError] = useState(""); // For handling errors
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Simple validation for password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      await signup({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.password,
+      });
+      setMessage("Signup successful! Please log in.");
+      setError(""); // Clear error message on success
+    } catch (err) {
+      setError(
+        err.response?.data?.detail || "Something went wrong. Please try again.", err
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <Header />
@@ -28,26 +68,42 @@ function SignupPage() {
 
             <h3 className="text-3xl font-semibold mb-6">Sign up</h3>
 
-            <form className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input
+                name="username"
                 type="text"
                 placeholder="Username"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.username}
+                onChange={handleChange}
+                required
               />
               <input
-                type="text"
-                placeholder="Email / Phone"
+                name="email"
+                type="email"
+                placeholder="Email"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
               <input
+                name="password"
                 type="password"
                 placeholder="Password"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.password}
+                onChange={handleChange}
+                required
               />
               <input
+                name="confirmPassword"
                 type="password"
                 placeholder="Confirm Password"
                 className="px-4 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
               />
               <button
                 type="submit"
@@ -56,6 +112,11 @@ function SignupPage() {
                 Signup
               </button>
             </form>
+
+            {message && (
+              <p className="mt-4 text-center text-green-400">{message}</p>
+            )}
+            {error && <p className="mt-4 text-center text-red-400">{error}</p>}
 
             <div className="flex items-center justify-center gap-4 mt-6">
               <span className="text-gray-400">Or sign up with</span>
@@ -75,7 +136,7 @@ function SignupPage() {
 
             <div className="mt-6 text-center text-gray-400 text-sm">
               Already registered?{" "}
-              <a href="#" className="text-purple-400 hover:underline">
+              <a href="/login" className="text-purple-400 hover:underline">
                 Login
               </a>
             </div>
